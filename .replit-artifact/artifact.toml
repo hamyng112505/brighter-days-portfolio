@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Photography Portfolio"
+description = "A cinematic photography portfolio homepage for showcasing intimate wedding and lifestyle stories, with a focused gallery, about section, and inquiry call to action."
+version = "1.0.0"
+id = "artifacts/photography-portfolio"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22100
+
+[services.development]
+run = "pnpm --filter @workspace/photography-portfolio run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/photography-portfolio", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/photography-portfolio/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22100"
+BASE_PATH = "/"
