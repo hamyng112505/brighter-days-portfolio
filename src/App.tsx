@@ -19,12 +19,12 @@ const queryClient = new QueryClient();
 
 const navLinks = [
   { label: 'Home', href: '#top' },
-  { label: 'Gallery', href: 'https://brighterdaysto.pixieset.com/', external: true },
+  { label: 'Gallery', href: 'https://brighterdaystophoto.pixieset.com/', external: true },
   { label: 'About', href: '#about' },
 ];
 
 const menuLinks = [
-  { label: 'Gallery', href: 'https://brighterdaysto.pixieset.com/', external: true },
+  { label: 'Gallery', href: 'https://brighterdaystophoto.pixieset.com/', external: true },
   { label: 'About', href: '#about' },
 ];
 
@@ -107,10 +107,10 @@ function HeroSlider() {
           ))}
         </div>
       </div>
-      <button type="button" onClick={() => go(-1)} aria-label="Previous photo" data-testid="button-hero-prev" className="absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#f6f4ef]/30 bg-[#232426]/50 text-[#f6f4ef] backdrop-blur transition hover:bg-[#f6f4ef] hover:text-[#232426] sm:left-6">
+      <button type="button" onClick={() => go(-1)} aria-label="Previous photo" data-testid="button-hero-prev" className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[#f6f4ef]/30 bg-[#232426]/50 text-[#f6f4ef] backdrop-blur transition hover:bg-[#f6f4ef] hover:text-[#232426] sm:left-6">
         <ArrowLeft size={18} />
       </button>
-      <button type="button" onClick={() => go(1)} aria-label="Next photo" data-testid="button-hero-next" className="absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#f6f4ef]/30 bg-[#232426]/50 text-[#f6f4ef] backdrop-blur transition hover:bg-[#f6f4ef] hover:text-[#232426] sm:right-6">
+      <button type="button" onClick={() => go(1)} aria-label="Next photo" data-testid="button-hero-next" className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[#f6f4ef]/30 bg-[#232426]/50 text-[#f6f4ef] backdrop-blur transition hover:bg-[#f6f4ef] hover:text-[#232426] sm:right-6">
         <ArrowRight size={18} />
       </button>
     </>
@@ -128,7 +128,7 @@ function Logo() {
   );
 }
 
-function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => void; onInquiry: () => void }) {
+function FullMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [entered, setEntered] = useState(false);
   const [instant, setInstant] = useState(false);
 
@@ -171,15 +171,6 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
                 {item.label}
               </a>
             ))}
-            <button
-              type="button"
-              onClick={() => { closeInstant(); onInquiry(); }}
-              data-testid="link-menu-contact"
-              className={`${linkClass} text-left`}
-              style={{ animationDelay: `${menuLinks.length * 0.06}s` }}
-            >
-              Contact
-            </button>
             <a
               href="https://www.instagram.com/brighterdaysto.photo/"
               target="_blank"
@@ -188,7 +179,7 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
               aria-label="Instagram"
               data-testid="link-menu-instagram"
               className="reveal flex items-center border-b border-[#232426]/12 py-4 text-[#232426] transition hover:text-[#232426]/60"
-              style={{ animationDelay: `${(menuLinks.length + 1) * 0.06}s` }}
+              style={{ animationDelay: `${menuLinks.length * 0.06}s` }}
             >
               <Instagram size={34} />
             </a>
@@ -196,8 +187,8 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
           <div className="flex-[2]" />
         </div>
         <div className="flex flex-col gap-4 border-t border-[#232426]/12 pt-6">
-          <a href="mailto:hello@brighterdaysto.com" data-testid="link-menu-email" className="label flex items-center gap-2 text-[11px] tracking-[.18em] text-[#232426]">
-            <Mail size={14} /> hello@brighterdaysto.com
+          <a href="mailto:hello@brighterdaystophoto.com" data-testid="link-menu-email" className="label flex items-center gap-2 text-[11px] tracking-[.18em] text-[#232426]">
+            <Mail size={14} /> hello@brighterdaystophoto.com
           </a>
         </div>
       </div>
@@ -205,14 +196,45 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
   );
 }
 
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/myezgzjl';
+
 function InquiryModal({ onClose }: { onClose: () => void }) {
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', type: '', day: '', month: '', year: '', address: '', note: '' });
   const needsAddress = form.type === 'Wedding' || form.type === 'Event';
 
-  function submitInquiry(event: FormEvent<HTMLFormElement>) {
+  async function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSent(true);
+    setSubmitting(true);
+    setSubmitError(false);
+    try {
+      const eventDate = [form.month, form.day, form.year].filter(Boolean).join(' ');
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: `New inquiry from ${form.firstName} ${form.lastName}`.trim(),
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          sessionType: form.type,
+          eventDate: eventDate || 'Not provided',
+          venueAddress: form.address || 'Not provided',
+          message: form.note,
+        }),
+      });
+      if (response.ok) {
+        setSent(true);
+      } else {
+        setSubmitError(true);
+      }
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -222,7 +244,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
           <img src={danceImage} alt="" className="h-full w-full object-cover" />
         </div>
         <div className="relative w-full overflow-y-auto px-6 py-6 sm:px-10 sm:py-8">
-        <button type="button" onClick={onClose} aria-label="Close inquiry form" data-testid="button-close-inquiry" className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center border border-[#cfcdc6] text-[#232426] transition hover:bg-[#eae8e2]">
+        <button type="button" onClick={onClose} aria-label="Close inquiry form" data-testid="button-close-inquiry" className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center border border-[#cfcdc6] text-[#232426] transition hover:bg-[#eae8e2]">
           <X size={16} strokeWidth={1.5} />
         </button>
         {!sent ? (
@@ -262,7 +284,8 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Venue address (if any)</span><input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} data-testid="input-inquiry-address" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Venue or location, if you know it" /></label>
               )}
               <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">A little about it *</span><textarea required value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} data-testid="input-inquiry-note" rows={4} className="w-full resize-none border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="The people, the place, the feeling..." /></label>
-              <button type="submit" data-testid="button-submit-inquiry" className="group mt-1 flex w-full items-center justify-between bg-[#232426] px-5 py-3.5 text-left text-sm text-[#f6f4ef] transition hover:bg-[#3a3a3d]">Send your note <ArrowUpRight size={17} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
+              {submitError && <p className="text-sm text-[#b3443a]">Something went wrong sending that. Please try again, or email hello@brighterdaystophoto.com directly.</p>}
+              <button type="submit" disabled={submitting} data-testid="button-submit-inquiry" className="group mt-1 flex w-full items-center justify-between bg-[#232426] px-6 py-4 text-left text-sm text-[#f6f4ef] transition hover:bg-[#3a3a3d] disabled:opacity-60">{submitting ? 'Sending...' : 'Send your note'} <ArrowUpRight size={17} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
             </form>
           </>
         ) : (
@@ -285,6 +308,17 @@ function Home() {
   const [headerElevated, setHeaderElevated] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [menuBtnSize, setMenuBtnSize] = useState(40);
+  const contactBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    function syncMenuBtnSize() {
+      if (contactBtnRef.current) setMenuBtnSize(contactBtnRef.current.offsetHeight);
+    }
+    syncMenuBtnSize();
+    window.addEventListener('resize', syncMenuBtnSize);
+    return () => window.removeEventListener('resize', syncMenuBtnSize);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = inquiryOpen || menuOpen ? 'hidden' : '';
@@ -321,8 +355,8 @@ function Home() {
           <Logo />
           <div className="flex items-center gap-4 sm:gap-8 md:gap-12">
             {navLinks.map((item) => <a key={item.href} href={item.href} {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})} data-testid={`link-nav-${item.label.toLowerCase()}`} className="label hidden text-[10px] uppercase tracking-[.18em] opacity-70 transition hover:opacity-100 md:block">{item.label}</a>)}
-            <button type="button" onClick={openInquiry} data-testid="button-nav-inquiry" className="label hidden items-center gap-2 border border-[#f6f4ef] bg-[#f6f4ef] px-3 py-2 text-[9px] uppercase tracking-[.13em] text-[#232426] transition hover:bg-[#e8e6e0] sm:px-4 sm:py-2.5 sm:text-[10px] sm:tracking-[.15em] md:flex">Contact Us <ArrowUpRight size={13} /></button>
-            <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} data-testid="button-open-menu" className="flex h-10 w-10 items-center justify-center border border-current/30 md:hidden">
+            <button ref={contactBtnRef} type="button" onClick={openInquiry} data-testid="button-nav-inquiry" className="label flex items-center gap-2 border border-[#f6f4ef] bg-[#f6f4ef] px-4 py-2.5 text-[9px] uppercase tracking-[.13em] text-[#232426] transition hover:bg-[#e8e6e0] sm:px-5 sm:py-3 sm:text-[10px] sm:tracking-[.15em]">Contact <ArrowUpRight size={13} /></button>
+            <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} data-testid="button-open-menu" style={{ width: menuBtnSize, height: menuBtnSize }} className="flex items-center justify-center border border-current/30 md:hidden">
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
@@ -365,7 +399,7 @@ function Home() {
           </div>
           <div className="flex flex-col gap-7">
             <div className="grid gap-5 md:grid-cols-2 md:items-start md:gap-7">
-              <a href="https://brighterdaysto.pixieset.com/amiras1stbirthday/" target="_blank" rel="noreferrer" data-testid="button-story-maple" className="group block w-full border-0 bg-transparent p-0 text-left">
+              <a href="https://brighterdaystophoto.pixieset.com/amiras1stbirthday/" target="_blank" rel="noreferrer" data-testid="button-story-maple" className="group block w-full border-0 bg-transparent p-0 text-left">
                 <div className="relative aspect-[4/3] overflow-hidden bg-[#dad8d2]"><img src={amiraBirthdayImage} alt="Mother holding her daughter at a first birthday celebration" className="image-lift h-full w-full object-cover" /><span className="absolute left-4 top-4 bg-[#f6f4ef] px-3 py-2 label text-[9px] uppercase tracking-[.16em] text-[#232426]">Toronto / Family</span><span className="absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-full bg-[#f6f4ef] text-[#232426] opacity-0 transition group-hover:opacity-100"><ArrowUpRight size={17} /></span></div>
                 <div className="mt-4 flex justify-between gap-4 border-b border-[#d9d7d0] pb-4"><div><h3 className="serif text-[28px] leading-none text-[#232426]">Amira's First Birthday</h3><p className="mt-2 text-xs text-[#8b8a84]">A first birthday celebration</p></div><span className="label pt-2 text-[10px] text-[#8b8a84]">01</span></div>
               </a>
@@ -386,7 +420,7 @@ function Home() {
             </div>
           </div>
           <div className="mt-14 flex justify-center">
-            <a href="https://brighterdaysto.pixieset.com/" target="_blank" rel="noreferrer" data-testid="button-gallery-more" className="label flex w-fit items-center gap-2 border border-[#232426]/25 px-4 py-2.5 text-[10px] uppercase tracking-[.16em] text-[#232426] transition hover:bg-[#232426] hover:text-[#f6f4ef]">See more work <ArrowUpRight size={13} /></a>
+            <a href="https://brighterdaystophoto.pixieset.com/" target="_blank" rel="noreferrer" data-testid="button-gallery-more" className="label flex w-fit items-center gap-2 border border-[#232426]/25 px-6 py-3.5 text-[10px] uppercase tracking-[.16em] text-[#232426] transition hover:bg-[#232426] hover:text-[#f6f4ef]">See more work <ArrowUpRight size={13} /></a>
           </div>
         </div>
       </section>
@@ -395,7 +429,7 @@ function Home() {
       <section className="overflow-hidden bg-[#f0f0ef] py-6 sm:py-8">
         <div className="marquee-track flex w-max items-center">
           {Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="serif whitespace-nowrap px-8 text-[clamp(2.6rem,9vw,6rem)] tracking-[-.02em] text-[#232426]">Engagement&nbsp;&nbsp;·&nbsp;&nbsp;Portrait&nbsp;&nbsp;·&nbsp;&nbsp;Family&nbsp;&nbsp;·&nbsp;&nbsp;Events&nbsp;&nbsp;·&nbsp;&nbsp;Wedding</span>
+            <span key={i} className="serif whitespace-nowrap px-8 text-[clamp(2.6rem,9vw,6rem)] tracking-[-.02em] text-[#232426]">Engagement&nbsp;&nbsp;·&nbsp;&nbsp;Portrait&nbsp;&nbsp;·&nbsp;&nbsp;Family&nbsp;&nbsp;·&nbsp;&nbsp;Events&nbsp;&nbsp;·&nbsp;&nbsp;Wedding&nbsp;&nbsp;·</span>
           ))}
         </div>
       </section>
@@ -412,7 +446,7 @@ function Home() {
             <h2 className="serif max-w-[680px] text-[clamp(2.9rem,6vw,6rem)] leading-[.91] tracking-[-.06em] text-[#232426]">I make room for the things you’ll <i>remember.</i></h2>
             <p className="mt-9 max-w-[480px] text-[15px] leading-7 text-[#6e6d67]">I’m the photographer behind Brighter Days, based in Toronto, shooting weddings, couples, portraits, families, and events across the GTA. I started this because I believe photographs don’t need to be perfect to be beautiful. They need to be true.</p>
             <p className="mt-5 max-w-[480px] text-[15px] leading-7 text-[#6e6d67]">Every set of photographs is edited true to colour and warm in tone: no heavy-handed presets, just the day as it actually looked, held onto a little longer.</p>
-            <button type="button" onClick={openInquiry} data-testid="button-about-inquiry" className="group mt-9 flex w-fit items-center gap-3 bg-[#232426] px-6 py-3.5 label text-[10px] uppercase tracking-[.18em] text-[#f6f4ef] transition hover:bg-[#3a3a3d]">Let’s talk <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" /></button>
+            <button type="button" onClick={openInquiry} data-testid="button-about-inquiry" className="group mt-9 flex w-fit items-center gap-3 bg-[#232426] px-7 py-4 label text-[10px] uppercase tracking-[.18em] text-[#f6f4ef] transition hover:bg-[#3a3a3d]">Let’s talk <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" /></button>
           </div>
         </div>
       </section>
@@ -425,18 +459,18 @@ function Home() {
                 <p className="label mb-4 text-[10px] uppercase tracking-[.23em] text-[#f6f4ef]/50">Your turn</p>
                 <h2 className="serif max-w-[560px] text-[clamp(2.4rem,7vw,4.5rem)] leading-[.92] tracking-[-.03em] text-[#f6f4ef]">Time to make<br /><i>it official.</i></h2>
               </div>
-              <button type="button" onClick={openInquiry} data-testid="button-footer-inquiry" className="group order-3 flex w-fit items-center gap-3 self-start bg-[#f6f4ef] px-6 py-3.5 label text-[10px] uppercase tracking-[.18em] text-[#232426] transition hover:bg-[#e8e6e0] md:order-none md:self-auto">Start an inquiry <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
+              <button type="button" onClick={openInquiry} data-testid="button-footer-inquiry" className="group order-3 flex w-fit items-center gap-3 self-start bg-[#f6f4ef] px-7 py-4 label text-[10px] uppercase tracking-[.18em] text-[#232426] transition hover:bg-[#e8e6e0] md:order-none md:self-auto">Start an inquiry <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
             </div>
             <p className="serif order-2 max-w-[420px] text-[16px] leading-[1.5] text-[#f6f4ef]/55 md:order-none md:text-[18px]">Engagement / Portrait / Family / Events / Wedding photographs across Toronto and the GTA.</p>
           </div>
           <div className="mt-14 flex flex-col justify-between gap-3 border-t border-[#f6f4ef]/15 pt-5 sm:flex-row">
             <p className="label text-[9px] uppercase tracking-[.15em] text-[#f6f4ef]/40">© 2026 Brighter Days Toronto Photography</p>
-            <a href="mailto:hello@brighterdaysto.com" data-testid="link-footer-contact" className="label flex items-center gap-2 text-[9px] tracking-[.15em] text-[#f6f4ef]/70">hello@brighterdaysto.com <Mail size={12} /></a>
+            <a href="mailto:hello@brighterdaystophoto.com" data-testid="link-footer-contact" className="label flex items-center gap-2 text-[9px] tracking-[.15em] text-[#f6f4ef]/70">hello@brighterdaystophoto.com <Mail size={12} /></a>
           </div>
         </div>
       </footer>
 
-      <FullMenu open={menuOpen} onClose={() => setMenuOpen(false)} onInquiry={openInquiry} />
+      <FullMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       {inquiryOpen && <InquiryModal onClose={() => setInquiryOpen(false)} />}
     </main>
   );
