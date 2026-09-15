@@ -196,7 +196,18 @@ function FullMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/myezgzjl';
+const EMAILJS_SERVICE_ID = 'service_2nm82oo';
+const EMAILJS_TEMPLATE_NOTIFY = 'template_xi9pvuv';
+const EMAILJS_TEMPLATE_CONFIRM = 'template_752hzsf';
+const EMAILJS_PUBLIC_KEY = 'CX83iWeEjXAdBWV73';
+
+declare global {
+  interface Window {
+    emailjs: {
+      send: (serviceId: string, templateId: string, params: Record<string, string>, publicKey: string) => Promise<unknown>;
+    };
+  }
+}
 
 const hearAboutOptions = ['Instagram', 'Google search', 'Pinterest', 'Referral from a friend', 'Vendor referral', 'Other'];
 
@@ -258,27 +269,21 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
     setSubmitError(false);
     try {
       const eventDate = [form.month, form.day, form.year].filter(Boolean).join(' ');
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          _subject: `New inquiry from ${form.firstName} ${form.lastName}`.trim(),
-          _gotcha: form.company,
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email.trim(),
-          sessionType: form.type,
-          eventDate: eventDate || 'Not provided',
-          venueAddress: form.address || 'Not provided',
-          message: form.note,
-          hearAbout: buildHearAboutSummary(form.hearAbout, form.hearAboutOther, form.referralName, form.vendorName),
-        }),
-      });
-      if (response.ok) {
-        setSent(true);
-      } else {
-        setSubmitError(true);
-      }
+      const sharedParams = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email.trim(),
+        sessionType: form.type,
+        eventDate: eventDate || 'Not provided',
+        venueAddress: form.address || 'Not provided',
+        message: form.note,
+        hearAbout: buildHearAboutSummary(form.hearAbout, form.hearAboutOther, form.referralName, form.vendorName),
+      };
+      await Promise.all([
+        window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_NOTIFY, sharedParams, EMAILJS_PUBLIC_KEY),
+        window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CONFIRM, sharedParams, EMAILJS_PUBLIC_KEY),
+      ]);
+      setSent(true);
     } catch {
       setSubmitError(true);
     } finally {
