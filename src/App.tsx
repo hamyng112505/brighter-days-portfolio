@@ -17,12 +17,12 @@ const queryClient = new QueryClient();
 
 const navLinks = [
   { label: 'Home', href: '#top' },
-  { label: 'Gallery', href: '#gallery' },
+  { label: 'Gallery', href: 'https://brighterdaysto.pixieset.com/', external: true },
   { label: 'About', href: '#about' },
 ];
 
 const menuLinks = [
-  { label: 'Gallery', href: '#gallery' },
+  { label: 'Gallery', href: 'https://brighterdaysto.pixieset.com/', external: true },
   { label: 'About', href: '#about' },
 ];
 
@@ -160,6 +160,7 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
               <a
                 key={item.href}
                 href={item.href}
+                {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})}
                 onClick={closeInstant}
                 data-testid={`link-menu-${item.label.toLowerCase()}`}
                 className={linkClass}
@@ -301,7 +302,7 @@ function Home() {
         <nav className="mx-auto flex max-w-[1380px] items-center justify-between" aria-label="Main navigation">
           <Logo />
           <div className="flex items-center gap-4 sm:gap-8 md:gap-12">
-            {navLinks.map((item) => <a key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase()}`} className="label hidden text-[10px] uppercase tracking-[.18em] opacity-70 transition hover:opacity-100 md:block">{item.label}</a>)}
+            {navLinks.map((item) => <a key={item.href} href={item.href} {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})} data-testid={`link-nav-${item.label.toLowerCase()}`} className="label hidden text-[10px] uppercase tracking-[.18em] opacity-70 transition hover:opacity-100 md:block">{item.label}</a>)}
             <button type="button" onClick={openInquiry} data-testid="button-nav-inquiry" className={`label hidden items-center gap-2 border px-3 py-2 text-[9px] uppercase tracking-[.13em] transition sm:px-4 sm:py-2.5 sm:text-[10px] sm:tracking-[.15em] md:flex ${scrolled ? 'border-[#232426] bg-[#232426] text-[#f6f4ef] hover:bg-[#3a3a3d]' : 'border-[#f6f4ef] bg-[#f6f4ef] text-[#232426] hover:bg-[#e8e6e0]'}`}>Contact Us <ArrowUpRight size={13} /></button>
             <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} data-testid="button-open-menu" className="flex h-10 w-10 items-center justify-center border border-current/30 md:hidden">
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
@@ -318,7 +319,7 @@ function Home() {
             <p className="label reveal mb-6 text-[10px] uppercase tracking-[.25em] text-[#f6f4ef]/70">Toronto &amp; the GTA &nbsp;·&nbsp; documentary photography</p>
             <h1 className="serif reveal reveal-delay-1 max-w-[900px] text-[clamp(2.6rem,6.5vw,6.5rem)] leading-[.9] tracking-[-.03em] text-[#faf9f5]">Warm, true-to-colour.<br /><i>Worth keeping.</i></h1>
             <div className="reveal reveal-delay-2 mt-10">
-              <a href="#gallery" data-testid="link-hero-gallery" className="group flex w-fit items-center gap-4 border-b border-[#f6f4ef]/50 pb-2 label text-[10px] uppercase tracking-[.19em] text-[#faf9f5] transition hover:border-[#faf9f5]">View the work <ArrowDown size={15} className="transition-transform group-hover:translate-y-1" /></a>
+              <a href="https://brighterdaysto.pixieset.com/" target="_blank" rel="noreferrer" data-testid="link-hero-gallery" className="group flex w-fit items-center gap-4 border-b border-[#f6f4ef]/50 pb-2 label text-[10px] uppercase tracking-[.19em] text-[#faf9f5] transition hover:border-[#faf9f5]">View the work <ArrowDown size={15} className="transition-transform group-hover:translate-y-1" /></a>
             </div>
           </div>
         </div>
@@ -370,7 +371,7 @@ function Home() {
             </div>
           </div>
           <div className="mt-14 flex justify-center">
-            <button type="button" onClick={openInquiry} data-testid="button-gallery-more" className="label flex w-fit items-center gap-2 border border-[#232426]/25 px-4 py-2.5 text-[10px] uppercase tracking-[.16em] text-[#232426] transition hover:bg-[#232426] hover:text-[#f6f4ef]">See more work <ArrowUpRight size={13} /></button>
+            <a href="https://brighterdaysto.pixieset.com/" target="_blank" rel="noreferrer" data-testid="button-gallery-more" className="label flex w-fit items-center gap-2 border border-[#232426]/25 px-4 py-2.5 text-[10px] uppercase tracking-[.16em] text-[#232426] transition hover:bg-[#232426] hover:text-[#f6f4ef]">See more work <ArrowUpRight size={13} /></a>
           </div>
         </div>
       </section>
@@ -379,7 +380,7 @@ function Home() {
       <section className="overflow-hidden bg-[#eae8e2] py-10 sm:py-14">
         <div className="marquee-track flex w-max items-center">
           {Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="serif whitespace-nowrap px-8 text-[clamp(2.6rem,9vw,6rem)] uppercase tracking-[-.02em] text-[#232426]">Brighter Days</span>
+            <span key={i} className="serif whitespace-nowrap px-8 text-[clamp(2.6rem,9vw,6rem)] tracking-[-.02em] text-[#232426]">Engagement&nbsp;&nbsp;/&nbsp;&nbsp;Portrait&nbsp;&nbsp;/&nbsp;&nbsp;Family&nbsp;&nbsp;/&nbsp;&nbsp;Events&nbsp;&nbsp;/&nbsp;&nbsp;Wedding</span>
           ))}
         </div>
       </section>
