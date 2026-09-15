@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent, ReactNode, TransitionEvent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Check, Instagram, Mail, Menu, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Instagram, Mail, Menu, X } from 'lucide-react';
 import heroImage from '../attached_assets/generated_images/hero-wedding.jpg';
 import portraitImage from '../attached_assets/generated_images/portrait-bride.jpg';
 import danceImage from '../attached_assets/generated_images/first-dance.jpg';
 import coastalImage from '../attached_assets/generated_images/coastal-ceremony.jpg';
 import ringsImage from '../attached_assets/generated_images/details-rings.jpg';
+import aboutPortraitImage from '../attached_assets/photos/about-portrait.jpg';
+import amiraBirthdayImage from '../attached_assets/photos/amira-birthday-01.jpg';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -178,15 +180,24 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
             >
               Contact
             </button>
+            <a
+              href="https://www.instagram.com/brighterdaysto.photo/"
+              target="_blank"
+              rel="noreferrer"
+              onClick={closeInstant}
+              aria-label="Instagram"
+              data-testid="link-menu-instagram"
+              className="reveal flex items-center border-b border-[#232426]/12 py-4 text-[#232426] transition hover:text-[#232426]/60"
+              style={{ animationDelay: `${(menuLinks.length + 1) * 0.06}s` }}
+            >
+              <Instagram size={34} />
+            </a>
           </nav>
           <div className="flex-[2]" />
         </div>
         <div className="flex flex-col gap-4 border-t border-[#232426]/12 pt-6">
-          <a href="mailto:hello@brighterdaystoronto.com" data-testid="link-menu-email" className="label flex items-center gap-2 text-[11px] uppercase tracking-[.18em] text-[#232426]">
-            <Mail size={14} /> hello@brighterdaystoronto.com
-          </a>
-          <a href="https://www.instagram.com/brighterdaysto.photo/" target="_blank" rel="noreferrer" data-testid="link-menu-instagram" className="label flex items-center gap-2 text-[11px] uppercase tracking-[.18em] text-[#232426]/70">
-            <Instagram size={14} /> @brighterdaysto.photo
+          <a href="mailto:hello@brighterdaysto.com" data-testid="link-menu-email" className="label flex items-center gap-2 text-[11px] tracking-[.18em] text-[#232426]">
+            <Mail size={14} /> hello@brighterdaysto.com
           </a>
         </div>
       </div>
@@ -297,13 +308,13 @@ function Home() {
   }
 
   return (
-    <main className="site-noise overflow-hidden bg-[#f6f4ef]">
-      <header className={`fixed left-0 right-0 top-0 px-5 py-3 transition-[background-color,color,box-shadow,backdrop-filter] duration-300 sm:px-9 sm:py-4 ${headerElevated ? 'z-[75]' : 'z-40'} ${scrolled || headerElevated ? 'bg-[#f6f4ef] text-[#232426] shadow-[0_1px_0_rgba(35,36,38,.08)]' : 'bg-transparent text-[#f6f4ef]'}`}>
+    <main className="site-noise overflow-hidden bg-white">
+      <header className={`fixed left-0 right-0 top-0 px-5 py-3 transition-[background-color,color,box-shadow,backdrop-filter] duration-300 sm:px-9 sm:py-4 text-[#f6f4ef] ${headerElevated ? 'z-[75]' : 'z-40'} ${scrolled || headerElevated ? 'bg-[#232426] shadow-[0_1px_0_rgba(0,0,0,.25)]' : 'bg-transparent'}`}>
         <nav className="mx-auto flex max-w-[1380px] items-center justify-between" aria-label="Main navigation">
           <Logo />
           <div className="flex items-center gap-4 sm:gap-8 md:gap-12">
             {navLinks.map((item) => <a key={item.href} href={item.href} {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})} data-testid={`link-nav-${item.label.toLowerCase()}`} className="label hidden text-[10px] uppercase tracking-[.18em] opacity-70 transition hover:opacity-100 md:block">{item.label}</a>)}
-            <button type="button" onClick={openInquiry} data-testid="button-nav-inquiry" className={`label hidden items-center gap-2 border px-3 py-2 text-[9px] uppercase tracking-[.13em] transition sm:px-4 sm:py-2.5 sm:text-[10px] sm:tracking-[.15em] md:flex ${scrolled ? 'border-[#232426] bg-[#232426] text-[#f6f4ef] hover:bg-[#3a3a3d]' : 'border-[#f6f4ef] bg-[#f6f4ef] text-[#232426] hover:bg-[#e8e6e0]'}`}>Contact Us <ArrowUpRight size={13} /></button>
+            <button type="button" onClick={openInquiry} data-testid="button-nav-inquiry" className="label hidden items-center gap-2 border border-[#f6f4ef] bg-[#f6f4ef] px-3 py-2 text-[9px] uppercase tracking-[.13em] text-[#232426] transition hover:bg-[#e8e6e0] sm:px-4 sm:py-2.5 sm:text-[10px] sm:tracking-[.15em] md:flex">Contact Us <ArrowUpRight size={13} /></button>
             <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} data-testid="button-open-menu" className="flex h-10 w-10 items-center justify-center border border-current/30 md:hidden">
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -317,16 +328,13 @@ function Home() {
         <div className="relative z-10 mx-auto w-full max-w-[1380px] px-5 pb-14 sm:px-9 sm:pb-20">
           <div className="max-w-[900px]">
             <p className="label reveal mb-6 text-[10px] uppercase tracking-[.25em] text-[#f6f4ef]/70">Toronto &amp; the GTA &nbsp;·&nbsp; documentary photography</p>
-            <h1 className="serif reveal reveal-delay-1 max-w-[900px] text-[clamp(2.6rem,6.5vw,6.5rem)] leading-[.9] tracking-[-.03em] text-[#faf9f5]">Warm, true-to-colour.<br /><i>Worth keeping.</i></h1>
-            <div className="reveal reveal-delay-2 mt-10">
-              <a href="https://brighterdaysto.pixieset.com/" target="_blank" rel="noreferrer" data-testid="link-hero-gallery" className="group flex w-fit items-center gap-4 border-b border-[#f6f4ef]/50 pb-2 label text-[10px] uppercase tracking-[.19em] text-[#faf9f5] transition hover:border-[#faf9f5]">View the work <ArrowDown size={15} className="transition-transform group-hover:translate-y-1" /></a>
-            </div>
+            <h1 className="serif reveal reveal-delay-1 max-w-[900px] text-[clamp(2.6rem,6.5vw,6.5rem)] leading-[.9] tracking-[-.03em] text-[#faf9f5]">Photos that feel<br /><i>like home.</i></h1>
           </div>
         </div>
         <span className="absolute bottom-7 right-6 hidden rotate-90 label text-[9px] uppercase tracking-[.25em] text-[#f6f4ef]/70 sm:block">Keep looking</span>
       </section>
 
-      <section className="bg-[#eae8e2] px-5 py-24 text-[#232426] sm:px-9 sm:py-32">
+      <section className="bg-[#f0f0ef] px-5 py-24 text-[#232426] sm:px-9 sm:py-32">
         <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[.7fr_1.4fr] md:gap-x-24 md:gap-y-0">
           <div className="contents md:block">
             <p className="order-1 label text-[10px] uppercase tracking-[.23em] text-[#232426]/55 md:order-none">A candid, unscripted<br />record of your people</p>
@@ -342,7 +350,7 @@ function Home() {
         </div>
       </section>
 
-      <section id="gallery" className="scroll-mt-10 bg-[#f6f4ef] px-5 py-24 sm:px-9 sm:py-36">
+      <section id="gallery" className="scroll-mt-10 bg-white px-5 py-24 sm:px-9 sm:py-36">
         <div className="mx-auto max-w-[1380px]">
           <div className="mb-14">
             <p className="label mb-4 text-[10px] uppercase tracking-[.23em] text-[#8b8a84]">Signature Work</p>
@@ -350,10 +358,10 @@ function Home() {
           </div>
           <div className="flex flex-col gap-7">
             <div className="grid gap-5 md:grid-cols-2 md:items-start md:gap-7">
-              <button type="button" onClick={openInquiry} data-testid="button-story-maple" className="group block w-full border-0 bg-transparent p-0 text-left">
-                <div className="relative aspect-[4/3] overflow-hidden bg-[#dad8d2]"><img src={danceImage} alt="Newlyweds slow dancing beneath warm reception lights" className="image-lift h-full w-full object-cover" /><span className="absolute left-4 top-4 bg-[#f6f4ef] px-3 py-2 label text-[9px] uppercase tracking-[.16em] text-[#232426]">Toronto / Wedding</span><span className="absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-full bg-[#f6f4ef] text-[#232426] opacity-0 transition group-hover:opacity-100"><ArrowUpRight size={17} /></span></div>
-                <div className="mt-4 flex justify-between gap-4 border-b border-[#d9d7d0] pb-4"><div><h3 className="serif text-[28px] leading-none text-[#232426]">The Maples</h3><p className="mt-2 text-xs text-[#8b8a84]">Full-day wedding coverage</p></div><span className="label pt-2 text-[10px] text-[#8b8a84]">01</span></div>
-              </button>
+              <a href="https://brighterdaysto.pixieset.com/amiras1stbirthday/" target="_blank" rel="noreferrer" data-testid="button-story-maple" className="group block w-full border-0 bg-transparent p-0 text-left">
+                <div className="relative aspect-[4/3] overflow-hidden bg-[#dad8d2]"><img src={amiraBirthdayImage} alt="Mother holding her daughter at a first birthday celebration" className="image-lift h-full w-full object-cover" /><span className="absolute left-4 top-4 bg-[#f6f4ef] px-3 py-2 label text-[9px] uppercase tracking-[.16em] text-[#232426]">Toronto / Family</span><span className="absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-full bg-[#f6f4ef] text-[#232426] opacity-0 transition group-hover:opacity-100"><ArrowUpRight size={17} /></span></div>
+                <div className="mt-4 flex justify-between gap-4 border-b border-[#d9d7d0] pb-4"><div><h3 className="serif text-[28px] leading-none text-[#232426]">Amira's First Birthday</h3><p className="mt-2 text-xs text-[#8b8a84]">A first birthday celebration</p></div><span className="label pt-2 text-[10px] text-[#8b8a84]">01</span></div>
+              </a>
               <button type="button" onClick={openInquiry} data-testid="button-story-coast" className="group block w-full border-0 bg-transparent p-0 text-left md:mt-16">
                 <div className="relative aspect-[4/3] overflow-hidden bg-[#dad8d2]"><img src={coastalImage} alt="Couple standing together at a coastal ceremony" className="image-lift h-full w-full object-cover" /><span className="absolute left-4 top-4 bg-[#232426] px-3 py-2 label text-[9px] uppercase tracking-[.16em] text-[#f6f4ef]">Prince Edward County / Elopement</span><span className="absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-full bg-[#f6f4ef] text-[#232426] opacity-0 transition group-hover:opacity-100"><ArrowUpRight size={17} /></span></div>
                 <div className="mt-4 flex justify-between gap-4 border-b border-[#d9d7d0] pb-4"><div><h3 className="serif text-[28px] leading-none text-[#232426]">North of Here</h3><p className="mt-2 text-xs text-[#8b8a84]">Small, coastal elopement</p></div><span className="label pt-2 text-[10px] text-[#8b8a84]">02</span></div>
@@ -377,19 +385,19 @@ function Home() {
       </section>
 
 
-      <section className="overflow-hidden bg-[#eae8e2] py-10 sm:py-14">
+      <section className="overflow-hidden bg-[#f0f0ef] py-6 sm:py-8">
         <div className="marquee-track flex w-max items-center">
           {Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="serif whitespace-nowrap px-8 text-[clamp(2.6rem,9vw,6rem)] tracking-[-.02em] text-[#232426]">Engagement&nbsp;&nbsp;/&nbsp;&nbsp;Portrait&nbsp;&nbsp;/&nbsp;&nbsp;Family&nbsp;&nbsp;/&nbsp;&nbsp;Events&nbsp;&nbsp;/&nbsp;&nbsp;Wedding</span>
+            <span key={i} className="serif whitespace-nowrap px-8 text-[clamp(2.6rem,9vw,6rem)] tracking-[-.02em] text-[#232426]">Engagement&nbsp;&nbsp;·&nbsp;&nbsp;Portrait&nbsp;&nbsp;·&nbsp;&nbsp;Family&nbsp;&nbsp;·&nbsp;&nbsp;Events&nbsp;&nbsp;·&nbsp;&nbsp;Wedding</span>
           ))}
         </div>
       </section>
 
-      <section id="about" className="scroll-mt-10 bg-[#f6f4ef] px-5 py-24 sm:px-9 sm:py-36">
+      <section id="about" className="scroll-mt-10 bg-white px-5 py-24 sm:px-9 sm:py-36">
         <div className="mx-auto grid max-w-[1180px] gap-14 md:grid-cols-[.9fr_1.1fr] md:items-center md:gap-28">
           <div className="relative mx-auto w-full max-w-[420px]">
             <div className="absolute -bottom-5 -right-5 h-40 w-40 border border-[#232426] sm:-right-8 sm:h-52 sm:w-52" />
-            <img src={portraitImage} alt="A quiet portrait, warmly and true-to-colour edited" className="relative aspect-[.78] w-full object-cover grayscale-[.15]" />
+            <img src={aboutPortraitImage} alt="A quiet portrait, warmly and true-to-colour edited" className="relative aspect-[.78] w-full object-cover grayscale-[.15]" />
             <p className="absolute -bottom-3 -left-3 rotate-[-7deg] bg-[#232426] px-4 py-3 serif text-[18px] italic text-[#f6f4ef]">quietly, warmly, always true</p>
           </div>
           <div>
@@ -408,7 +416,7 @@ function Home() {
             <div className="contents md:flex md:flex-wrap md:items-start md:justify-between md:gap-6">
               <div className="order-1 md:order-none">
                 <p className="label mb-4 text-[10px] uppercase tracking-[.23em] text-[#f6f4ef]/50">Your turn</p>
-                <h2 className="serif max-w-[560px] text-[clamp(2.4rem,7vw,4.5rem)] leading-[.92] tracking-[-.03em] text-[#f6f4ef]">Let’s make<br /><i>something true.</i></h2>
+                <h2 className="serif max-w-[560px] text-[clamp(2.4rem,7vw,4.5rem)] leading-[.92] tracking-[-.03em] text-[#f6f4ef]">Time to make<br /><i>it official.</i></h2>
               </div>
               <button type="button" onClick={openInquiry} data-testid="button-footer-inquiry" className="group order-3 flex w-fit items-center gap-3 self-start bg-[#f6f4ef] px-6 py-3.5 label text-[10px] uppercase tracking-[.18em] text-[#232426] transition hover:bg-[#e8e6e0] md:order-none md:self-auto">Start an inquiry <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
             </div>
@@ -416,7 +424,7 @@ function Home() {
           </div>
           <div className="mt-14 flex flex-col justify-between gap-3 border-t border-[#f6f4ef]/15 pt-5 sm:flex-row">
             <p className="label text-[9px] uppercase tracking-[.15em] text-[#f6f4ef]/40">© 2026 Brighter Days Toronto Photography</p>
-            <a href="mailto:hello@brighterdaystoronto.com" data-testid="link-footer-contact" className="label flex items-center gap-2 text-[9px] uppercase tracking-[.15em] text-[#f6f4ef]/70">hello@brighterdaystoronto.com <Mail size={12} /></a>
+            <a href="mailto:hello@brighterdaysto.com" data-testid="link-footer-contact" className="label flex items-center gap-2 text-[9px] tracking-[.15em] text-[#f6f4ef]/70">hello@brighterdaysto.com <Mail size={12} /></a>
           </div>
         </div>
       </footer>

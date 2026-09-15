@@ -116,7 +116,7 @@
 .float-slow { animation: float 5s ease-in-out infinite; }
 .image-lift { transition: transform .8s cubic-bezier(.22,.8,.25,1), filter .8s ease; }
 .image-lift:hover { transform: scale(1.035); filter: saturate(1.06); }
-.marquee-track { animation: marquee 55s linear infinite; }
+.marquee-track { animation: marquee 100s linear infinite; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
