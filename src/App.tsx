@@ -207,7 +207,8 @@ function FullMenu({ open, onClose, onInquiry }: { open: boolean; onClose: () => 
 
 function InquiryModal({ onClose }: { onClose: () => void }) {
   const [sent, setSent] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', type: '', day: '', month: '', year: '', note: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', type: '', day: '', month: '', year: '', address: '', note: '' });
+  const needsAddress = form.type === 'Wedding' || form.type === 'Event';
 
   function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -228,10 +229,13 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
           <>
             <p className="label mb-3 text-[10px] uppercase tracking-[.24em] text-[#8b8a84]">Start a conversation</p>
             <h2 id="inquiry-title" className="serif max-w-[420px] text-[30px] leading-[1] text-[#232426] sm:text-[38px]">Tell me about it.</h2>
-            <p className="mt-2 max-w-[430px] text-[13px] leading-5 text-[#6e6d67]">A few details are plenty for now — I’ll be in touch within two business days.</p>
+            <p className="mt-2 max-w-[430px] text-[13px] leading-5 text-[#6e6d67]">A few details are plenty for now. I’ll be in touch within two business days.</p>
             <form onSubmit={submitInquiry} className="mt-5 space-y-3">
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Your name</span><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} data-testid="input-inquiry-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="First and last" /></label>
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Email</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-inquiry-email" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="you@example.com" /></label>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">First name *</span><input required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} data-testid="input-inquiry-first-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="First" /></label>
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Last name</span><input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} data-testid="input-inquiry-last-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Last" /></label>
+              </div>
+              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Email *</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-inquiry-email" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="you@example.com" /></label>
               <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Date (if you have one)</span>
                 <div className="grid grid-cols-3 gap-2">
                   <select value={form.day} onChange={(e) => setForm({ ...form, day: e.target.value })} data-testid="select-inquiry-day" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
@@ -248,13 +252,16 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                   </select>
                 </div>
               </label>
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">What kind of session</span>
+              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">What kind of session *</span>
                 <select required value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} data-testid="select-inquiry-type" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
                   <option value="" disabled>Choose one</option>
                   {sessionTypes.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
               </label>
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">A little about it</span><textarea required value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} data-testid="input-inquiry-note" rows={4} className="w-full resize-none border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="The people, the place, the feeling..." /></label>
+              {needsAddress && (
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Venue address (if any)</span><input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} data-testid="input-inquiry-address" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Venue or location, if you know it" /></label>
+              )}
+              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">A little about it *</span><textarea required value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} data-testid="input-inquiry-note" rows={4} className="w-full resize-none border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="The people, the place, the feeling..." /></label>
               <button type="submit" data-testid="button-submit-inquiry" className="group mt-1 flex w-full items-center justify-between bg-[#232426] px-5 py-3.5 text-left text-sm text-[#f6f4ef] transition hover:bg-[#3a3a3d]">Send your note <ArrowUpRight size={17} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
             </form>
           </>
@@ -263,7 +270,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
             <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#232426] text-[#f6f4ef]"><Check size={22} /></span>
             <p className="label mb-4 text-[10px] uppercase tracking-[.24em] text-[#8b8a84]">Note received</p>
             <h2 className="serif text-[36px] leading-[1] text-[#232426]">This is the beginning of something good.</h2>
-            <p className="mt-4 max-w-[410px] text-sm leading-6 text-[#6e6d67]">Thank you, {form.name || 'there'}. Your note is safely with me. I’ll be back in your inbox soon.</p>
+            <p className="mt-4 max-w-[410px] text-sm leading-6 text-[#6e6d67]">Thank you, {form.firstName || 'there'}. Your note is safely with me. I’ll be back in your inbox soon.</p>
             <button type="button" onClick={onClose} data-testid="button-finish-inquiry" className="mt-6 flex w-fit items-center gap-3 border-b border-[#232426] pb-2 text-sm text-[#232426]">Close this window <ArrowRight size={15} /></button>
           </div>
         )}
@@ -327,7 +334,7 @@ function Home() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#232426]/92 via-[#232426]/10 to-[#232426]/25" />
         <div className="relative z-10 mx-auto w-full max-w-[1380px] px-5 pb-14 sm:px-9 sm:pb-20">
           <div className="max-w-[900px]">
-            <p className="label reveal mb-6 text-[10px] uppercase tracking-[.25em] text-[#f6f4ef]/70">Toronto &amp; the GTA &nbsp;·&nbsp; documentary photography</p>
+            <p className="label reveal mb-6 text-[10px] uppercase tracking-[.25em] text-[#f6f4ef]/70">Toronto &amp; the GTA</p>
             <h1 className="serif reveal reveal-delay-1 max-w-[900px] text-[clamp(2.6rem,6.5vw,6.5rem)] leading-[.9] tracking-[-.03em] text-[#faf9f5]">Photos that feel<br /><i>like home.</i></h1>
           </div>
         </div>
@@ -337,7 +344,7 @@ function Home() {
       <section className="bg-[#f0f0ef] px-5 py-24 text-[#232426] sm:px-9 sm:py-32">
         <div className="mx-auto grid max-w-[1180px] gap-10 md:grid-cols-[.7fr_1.4fr] md:gap-x-24 md:gap-y-0">
           <div className="contents md:block">
-            <p className="order-1 label text-[10px] uppercase tracking-[.23em] text-[#232426]/55 md:order-none">A candid, unscripted<br />record of your people</p>
+            <p className="order-1 label text-[10px] uppercase tracking-[.23em] text-[#232426]/55 md:order-none">A candid, unscripted<br />record of your day</p>
             <div className="order-3 relative mb-14 w-full max-w-[420px] md:order-none md:mb-0 md:mt-10">
               <div className="aspect-[4/5] overflow-hidden bg-[#c9c7c1]"><img src={portraitImage} alt="Candid portrait moment during a wedding" className="h-full w-full object-cover" /></div>
               <div className="absolute -bottom-4 -right-4 aspect-square w-[48%] overflow-hidden border-[8px] border-[#faf9f5] shadow-xl md:-bottom-10 md:-right-10"><img src={ringsImage} alt="Close detail photograph of hands and rings" className="h-full w-full object-cover" /></div>
@@ -345,7 +352,7 @@ function Home() {
           </div>
           <div className="contents md:block">
             <h2 className="order-2 serif max-w-[800px] text-[clamp(2.8rem,6vw,6.5rem)] leading-[.95] tracking-[-.06em] text-[#232426] md:order-none">The big feeling is usually hiding in the <i>small things.</i></h2>
-            <p className="order-4 max-w-[480px] text-[15px] leading-7 text-[#6e6d67] md:order-none md:mt-8">The hand that finds yours under the table. The look between siblings. A room full of people you love, moving as one. I shoot documentary-style — quietly, and true to how it actually looked — so you get the real day back, not a performance of it.</p>
+            <p className="order-4 max-w-[480px] text-[15px] leading-7 text-[#6e6d67] md:order-none md:mt-8">The hand that finds yours under the table. The look between siblings. A room full of people you love, moving as one. I shoot documentary-style, quietly, and true to how it actually looked, so you get the real day back, not a performance of it.</p>
           </div>
         </div>
       </section>
@@ -403,8 +410,8 @@ function Home() {
           <div>
             <p className="label mb-6 text-[10px] uppercase tracking-[.23em] text-[#8b8a84]">A little about me</p>
             <h2 className="serif max-w-[680px] text-[clamp(2.9rem,6vw,6rem)] leading-[.91] tracking-[-.06em] text-[#232426]">I make room for the things you’ll <i>remember.</i></h2>
-            <p className="mt-9 max-w-[480px] text-[15px] leading-7 text-[#6e6d67]">I’m the photographer behind Brighter Days — based in Toronto, shooting weddings, couples, portraits, families, and events across the GTA. I started this because I believe photographs don’t need to be perfect to be beautiful. They need to be true.</p>
-            <p className="mt-5 max-w-[480px] text-[15px] leading-7 text-[#6e6d67]">Every set of photographs is edited true to colour and warm in tone — no heavy-handed presets, just the day as it actually looked, held onto a little longer.</p>
+            <p className="mt-9 max-w-[480px] text-[15px] leading-7 text-[#6e6d67]">I’m the photographer behind Brighter Days, based in Toronto, shooting weddings, couples, portraits, families, and events across the GTA. I started this because I believe photographs don’t need to be perfect to be beautiful. They need to be true.</p>
+            <p className="mt-5 max-w-[480px] text-[15px] leading-7 text-[#6e6d67]">Every set of photographs is edited true to colour and warm in tone: no heavy-handed presets, just the day as it actually looked, held onto a little longer.</p>
             <button type="button" onClick={openInquiry} data-testid="button-about-inquiry" className="group mt-9 flex w-fit items-center gap-3 bg-[#232426] px-6 py-3.5 label text-[10px] uppercase tracking-[.18em] text-[#f6f4ef] transition hover:bg-[#3a3a3d]">Let’s talk <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" /></button>
           </div>
         </div>
