@@ -202,11 +202,15 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', type: '', day: '', month: '', year: '', address: '', note: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', type: '', day: '', month: '', year: '', address: '', note: '', company: '' });
   const needsAddress = form.type === 'Wedding' || form.type === 'Event';
 
   async function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (form.company) {
+      setSent(true);
+      return;
+    }
     setSubmitting(true);
     setSubmitError(false);
     try {
@@ -216,9 +220,10 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           _subject: `New inquiry from ${form.firstName} ${form.lastName}`.trim(),
+          _gotcha: form.company,
           firstName: form.firstName,
           lastName: form.lastName,
-          email: form.email,
+          email: form.email.trim(),
           sessionType: form.type,
           eventDate: eventDate || 'Not provided',
           venueAddress: form.address || 'Not provided',
@@ -257,7 +262,8 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
                 <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">First name *</span><input required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} data-testid="input-inquiry-first-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="First" /></label>
                 <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Last name</span><input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} data-testid="input-inquiry-last-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Last" /></label>
               </div>
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Email *</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-inquiry-email" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="you@example.com" /></label>
+              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Email *</span><input required type="email" pattern="[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}" title="Enter a full email address, like you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-inquiry-email" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="you@example.com" /></label>
+              <input type="text" name="company" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] top-auto h-0 w-0 overflow-hidden" />
               <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Date (if you have one)</span>
                 <div className="grid grid-cols-3 gap-2">
                   <select value={form.day} onChange={(e) => setForm({ ...form, day: e.target.value })} data-testid="select-inquiry-day" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
