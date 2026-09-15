@@ -198,12 +198,46 @@ function FullMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/myezgzjl';
 
+const hearAboutOptions = ['Instagram', 'Google search', 'Pinterest', 'Referral from a friend', 'Vendor referral', 'Other'];
+
+function buildHearAboutSummary(selected: string[], otherText: string, referralName: string, vendorName: string) {
+  if (selected.length === 0) return 'Not provided';
+  return selected
+    .map((o) => {
+      if (o === 'Other' && otherText.trim()) return `Other: ${otherText.trim()}`;
+      if (o === 'Referral from a friend' && referralName.trim()) return `Referral from a friend (${referralName.trim()})`;
+      if (o === 'Vendor referral' && vendorName.trim()) return `Vendor referral (${vendorName.trim()})`;
+      return o;
+    })
+    .join(', ');
+}
+
 function InquiryModal({ onClose }: { onClose: () => void }) {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', type: '', day: '', month: '', year: '', address: '', note: '', company: '' });
+  const [hearAboutError, setHearAboutError] = useState('');
+  const [step, setStep] = useState<1 | 2>(1);
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', type: '', day: '', month: '', year: '', address: '', note: '', hearAbout: [] as string[], hearAboutOther: '', referralName: '', vendorName: '', company: '' });
   const needsAddress = form.type === 'Wedding' || form.type === 'Event';
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function goToStep2(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (formRef.current && !formRef.current.checkValidity()) {
+      formRef.current.reportValidity();
+      return;
+    }
+    setStep(2);
+  }
+
+  function toggleHearAbout(option: string) {
+    setHearAboutError('');
+    setForm((f) => ({
+      ...f,
+      hearAbout: f.hearAbout.includes(option) ? f.hearAbout.filter((o) => o !== option) : [...f.hearAbout, option],
+    }));
+  }
 
   async function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -211,6 +245,15 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
       setSent(true);
       return;
     }
+    if (form.hearAbout.length === 0) {
+      setHearAboutError('Please select at least one option.');
+      return;
+    }
+    if (form.hearAbout.includes('Other') && !form.hearAboutOther.trim()) {
+      setHearAboutError('Please tell us where.');
+      return;
+    }
+    setHearAboutError('');
     setSubmitting(true);
     setSubmitError(false);
     try {
@@ -228,6 +271,7 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
           eventDate: eventDate || 'Not provided',
           venueAddress: form.address || 'Not provided',
           message: form.note,
+          hearAbout: buildHearAboutSummary(form.hearAbout, form.hearAboutOther, form.referralName, form.vendorName),
         }),
       });
       if (response.ok) {
@@ -255,43 +299,77 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
         {!sent ? (
           <>
             <p className="label mb-3 text-[10px] uppercase tracking-[.24em] text-[#8b8a84]">Start a conversation</p>
-            <h2 id="inquiry-title" className="serif max-w-[420px] text-[30px] leading-[1] text-[#232426] sm:text-[38px]">Tell me about it.</h2>
-            <p className="mt-2 max-w-[430px] text-[13px] leading-5 text-[#6e6d67]">A few details are plenty for now. I’ll be in touch within two business days.</p>
-            <form onSubmit={submitInquiry} className="mt-5 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">First name *</span><input required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} data-testid="input-inquiry-first-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="First" /></label>
-                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Last name</span><input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} data-testid="input-inquiry-last-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Last" /></label>
-              </div>
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Email *</span><input required type="email" pattern="[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}" title="Enter a full email address, like you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-inquiry-email" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="you@example.com" /></label>
-              <input type="text" name="company" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] top-auto h-0 w-0 overflow-hidden" />
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Date (if you have one)</span>
-                <div className="grid grid-cols-3 gap-2">
-                  <select value={form.day} onChange={(e) => setForm({ ...form, day: e.target.value })} data-testid="select-inquiry-day" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
-                    <option value="">Day</option>
-                    {days.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <select value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} data-testid="select-inquiry-month" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
-                    <option value="">Month</option>
-                    {months.map((m) => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                  <select value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} data-testid="select-inquiry-year" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
-                    <option value="">Year</option>
-                    {years.map((y) => <option key={y} value={y}>{y}</option>)}
-                  </select>
+            <h2 id="inquiry-title" className={`serif max-w-[420px] text-[30px] leading-[1] text-[#232426] sm:text-[38px] ${step === 2 ? 'mb-7' : ''}`}>{step === 1 ? 'Tell me about it.' : 'How did you hear about us?'}</h2>
+            {step === 1 && <p className="mt-2 max-w-[430px] text-[13px] leading-5 text-[#6e6d67]">A few details are plenty for now. I’ll be in touch within two business days.</p>}
+            <form ref={formRef} onSubmit={step === 1 ? goToStep2 : submitInquiry} className="mt-5 space-y-3">
+              <div className={step === 1 ? 'space-y-3' : 'hidden'}>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">First name *</span><input required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} data-testid="input-inquiry-first-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="First" /></label>
+                  <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Last name</span><input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} data-testid="input-inquiry-last-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Last" /></label>
                 </div>
-              </label>
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">What kind of session *</span>
-                <select required value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} data-testid="select-inquiry-type" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
-                  <option value="" disabled>Choose one</option>
-                  {sessionTypes.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </label>
-              {needsAddress && (
-                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Venue address (if any)</span><input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} data-testid="input-inquiry-address" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Venue or location, if you know it" /></label>
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Email *</span><input required type="email" pattern="[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}" title="Enter a full email address, like you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-inquiry-email" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="you@example.com" /></label>
+                <input type="text" name="company" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] top-auto h-0 w-0 overflow-hidden" />
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Date (if you have one)</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select value={form.day} onChange={(e) => setForm({ ...form, day: e.target.value })} data-testid="select-inquiry-day" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
+                      <option value="">Day</option>
+                      {days.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <select value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} data-testid="select-inquiry-month" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
+                      <option value="">Month</option>
+                      {months.map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <select value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} data-testid="select-inquiry-year" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
+                      <option value="">Year</option>
+                      {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
+                </label>
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">What kind of session *</span>
+                  <select required value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} data-testid="select-inquiry-type" style={selectArrowStyle} className="w-full appearance-none border border-[#cfcdc6] bg-[#faf9f5] bg-no-repeat py-2 pl-3 pr-7 text-sm text-[#232426] outline-none transition-colors focus:border-[#232426]">
+                    <option value="" disabled>Choose one</option>
+                    {sessionTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </label>
+                {needsAddress && (
+                  <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Venue address (if any)</span><input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} data-testid="input-inquiry-address" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Venue or location, if you know it" /></label>
+                )}
+                <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">A little about it *</span><textarea required value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} data-testid="input-inquiry-note" rows={4} className="w-full resize-none border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="The people, the place, the feeling..." /></label>
+                <button type="submit" data-testid="button-next-inquiry" className="group mt-1 flex w-full items-center justify-between bg-[#232426] px-6 py-4 text-left text-sm text-[#f6f4ef] transition hover:bg-[#3a3a3d]">Next <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" /></button>
+              </div>
+              {step === 2 && (
+                <div className="space-y-5">
+                  <div className="flex flex-col gap-2">
+                    {hearAboutOptions.map((o) => {
+                      const checked = form.hearAbout.includes(o);
+                      return (
+                        <div key={o}>
+                          <label className={`flex cursor-pointer items-center gap-2.5 border px-3 py-2 text-sm transition ${checked ? 'border-[#232426] bg-[#232426] text-[#f6f4ef]' : 'border-[#cfcdc6] bg-[#faf9f5] text-[#232426] hover:border-[#232426]/50'}`}>
+                            <input type="checkbox" checked={checked} onChange={() => toggleHearAbout(o)} data-testid={`checkbox-hear-about-${o.toLowerCase().replace(/\s+/g, '-')}`} className="sr-only" />
+                            <span className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center border ${checked ? 'border-[#f6f4ef]' : 'border-[#8b8a84]'}`}>{checked && <Check size={9} />}</span>
+                            {o}
+                          </label>
+                          {o === 'Referral from a friend' && checked && (
+                            <label className="mt-2 block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Who can we thank?</span><input value={form.referralName} onChange={(e) => setForm({ ...form, referralName: e.target.value })} data-testid="input-inquiry-referral-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Their name" /></label>
+                          )}
+                          {o === 'Vendor referral' && checked && (
+                            <label className="mt-2 block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">Which vendor?</span><input value={form.vendorName} onChange={(e) => setForm({ ...form, vendorName: e.target.value })} data-testid="input-inquiry-vendor-name" className="w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Vendor name" /></label>
+                          )}
+                          {o === 'Other' && checked && (
+                            <input value={form.hearAboutOther} onChange={(e) => { setHearAboutError(''); setForm({ ...form, hearAboutOther: e.target.value }); }} data-testid="input-inquiry-hear-about-other" className="mt-2 w-full border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="Tell us where" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {hearAboutError && <p className="text-sm text-[#b3443a]">{hearAboutError}</p>}
+                  {submitError && <p className="text-sm text-[#b3443a]">Something went wrong sending that. Please try again, or email hello@brighterdaystophoto.com directly.</p>}
+                  <div className="flex items-stretch gap-3">
+                    <button type="button" onClick={() => setStep(1)} data-testid="button-back-inquiry" className="label flex items-center justify-center whitespace-nowrap border border-[#232426]/25 px-4 py-4 text-sm uppercase tracking-[.13em] text-[#232426] transition hover:bg-[#232426]/5 sm:px-6">Back</button>
+                    <button type="submit" disabled={submitting} data-testid="button-submit-inquiry" className="group flex flex-1 items-center justify-between whitespace-nowrap bg-[#232426] px-4 py-4 text-left text-sm text-[#f6f4ef] transition hover:bg-[#3a3a3d] disabled:opacity-60 sm:px-6">{submitting ? 'Sending...' : 'Send message'} <ArrowUpRight size={17} className="ml-2 shrink-0 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
+                  </div>
+                </div>
               )}
-              <label className="block"><span className="label mb-1 block text-[10px] uppercase tracking-[.18em] text-[#6e6d67]">A little about it *</span><textarea required value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} data-testid="input-inquiry-note" rows={4} className="w-full resize-none border border-[#cfcdc6] bg-[#faf9f5] px-3 py-2 text-sm text-[#232426] outline-none transition-colors placeholder:text-[#a6a49d] focus:border-[#232426]" placeholder="The people, the place, the feeling..." /></label>
-              {submitError && <p className="text-sm text-[#b3443a]">Something went wrong sending that. Please try again, or email hello@brighterdaystophoto.com directly.</p>}
-              <button type="submit" disabled={submitting} data-testid="button-submit-inquiry" className="group mt-1 flex w-full items-center justify-between bg-[#232426] px-6 py-4 text-left text-sm text-[#f6f4ef] transition hover:bg-[#3a3a3d] disabled:opacity-60">{submitting ? 'Sending...' : 'Send your note'} <ArrowUpRight size={17} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></button>
             </form>
           </>
         ) : (
